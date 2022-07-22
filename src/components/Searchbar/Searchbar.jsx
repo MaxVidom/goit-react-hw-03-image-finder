@@ -13,26 +13,27 @@ export default class Searchbar extends Component {
 
   handleSubmitForm = evt => {
     const { inputName } = this.state;
+    const { onSubmit } = this.props;
     evt.preventDefault();
-    this.props.onSubmit(inputName);
+    onSubmit(inputName);
     this.setState({ inputName: '' });
   };
 
   render() {
+    const { inputName } = this.state;
     return (
       <header className={style.searchbar}>
         <form className={style.searchForm} onSubmit={this.handleSubmitForm}>
           <button type="submit" className={style.searchFormButton}>
             <span className={style.searchFormButtonLabel}>Search</span>
           </button>
-
           <input
             className={style.searchFormInput}
             type="text"
             // autocomplete="off"
             // autofocus
             placeholder="Search images and photos"
-            value={this.state.inputName}
+            value={inputName}
             onChange={this.handleNameChange}
           />
         </form>

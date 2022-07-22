@@ -10,21 +10,20 @@ export default class ImageGallery extends Component {
     error: null,
   };
 
-  componentDidMount() {}
+  perPage = 12;
 
   async componentDidUpdate(prevProps, prevState) {
     const prevName = prevProps.pictureName;
-    const currentName = this.props.pictureName;
     const prevPage = prevProps.currentPage;
-    const page = this.props.currentPage;
+    const { pictureName, currentPage, onGet } = this.props;
 
-    if (prevName !== currentName) {
+    if (prevName !== pictureName) {
       this.setState({ gallery: [] });
     }
-    if (prevName !== currentName || prevPage !== page) {
+    if (prevName !== pictureName || prevPage !== currentPage) {
       this.setState({ loader: true });
       await fetch(
-        `https://pixabay.com/api/?q=${currentName}&page=${page}&key=27859965-17b92fa88b33871dcb6f37147&image_type=photo&orientation=horizontal&per_page=12`
+        `https://pixabay.com/api/?q=${pictureName}&page=${currentPage}&key=27859965-17b92fa88b33871dcb6f37147&image_type=photo&orientation=horizontal&per_page=${this.perPage}`
       )
         .then(res => {
           if (res.ok) {
@@ -33,11 +32,14 @@ export default class ImageGallery extends Component {
           return Promise.reject(new Error('Sorry'));
         })
         .then(galleryPictures => {
-          console.log(page);
-          this.props.onGet(galleryPictures.total > 0);
           this.setState(prevState => ({
             gallery: [...prevState.gallery, ...galleryPictures.hits],
           }));
+          onGet(
+            galleryPictures.total !==
+              (currentPage - 1) * this.perPage + galleryPictures.hits.length &&
+              galleryPictures.total > 0
+          );
         })
         .catch(error => this.setState({ error }))
         .finally(() => {
@@ -48,6 +50,7 @@ export default class ImageGallery extends Component {
 
   render() {
     const { gallery, loader, error } = this.state;
+    const { toggleModal } = this.props;
     return (
       <>
         {error && <h1>{error.message}</h1>}
@@ -59,6 +62,7 @@ export default class ImageGallery extends Component {
                 key={id}
                 webformatURL={webformatURL}
                 largeImageURL={largeImageURL}
+                toggleModal={toggleModal}
               />
             );
           })}
